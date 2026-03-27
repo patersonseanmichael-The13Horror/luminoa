@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💳 TapPay Wallet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            overflow: hidden;
+        }
+
+        /* ── Animated background ── */
+        .bg-circles {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(79, 195, 247, 0.05);
+            animation: pulse 6s infinite ease-in-out;
+        }
+
+        .circle:nth-child(1) { width: 300px; height: 300px; top: -100px; left: -100px; animation-delay: 0s; }
+        .circle:nth-child(2) { width: 200px; height: 200px; bottom: -50px; right: -50px; animation-delay: 2s; }
+        .circle:nth-child(3) { width: 150px; height: 150px; top: 50%; right: 20%; animation-delay: 4s; }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50%       { transform: scale(1.2); opacity: 1; }
+        }
+
+        /* ── App wrapper ── */
+        .app {
+            width: 100%;
+            max-width: 420px;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* ── Header ── */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #fff;
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .header h1 span { color: #4fc3f7; }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4fc3f7, #0d47a1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            border: 3px solid rgba(79, 195, 247, 0.4);
+            box-shadow: 0 0 15px rgba(79, 195, 247, 0.3);
+        }
+
+        /* ── Card ── */
+        .card {
+            background: linear-gradient(135deg, #1e3a5f, #0d47a1, #1565c0);
+            border-radius: 24px;
+            padding: 28px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(13, 71, 161, 0.5);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 70px rgba(13, 71, 161, 0.7);
+        }
+
+        /* Card shine effect */
+        .card::before {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 30%,
+                rgba(255,255,255,0.05) 50%,
+                transparent 70%
+            );
+            animation: shine 4s infinite;
+        }
+
+        @keyframes shine {
+            0%   { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        /* Card circles */
+        .card-circle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+        }
+
+        .card-circle:nth-child(1) { width: 180px; height: 180px; top: -60px; right: -40px; }
+        .card-circle:nth-child(2) { width: 120px; height: 120px; bottom: -30px; right: 60px; }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-type {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .card-logo {
+            font-size: 2rem;
+        }
+
+        /* NFC / Tap icon */
+        .nfc-icon {
+            position: absolute;
+            right: 28px;
+            bottom: 28px;
+            font-size: 2rem;
+            color: rgba(255,255,255,0.8);
+            animation: nfcPulse 2s infinite;
+            z-index: 2;
+        }
+
+        @keyframes nfcPulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50%       { opacity: 1;   transform: scale(1.15); }
+        }
+
+        .card-number {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.3rem;
+            letter-spacing: 6px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 2;
+            font-weight: 300;
+        }
+
+        .card-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            position: relative;
+            z-index: 2;
+        }
+
+        .card-holder label,
+        .card-expiry label {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.7rem;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .card-holder span,
+        .card-expiry span {
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        /* ── Balance ── */
+        .balance-box {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .balance-left label {
+            color: rgba(255,255,255,0.5);
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .balance-left .amount {
+            color: #fff;
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+
+        .balance-left .amount span {
+            color: #4fc3f7;
+            font-size: 1.5rem;
+        }
+
+        .add-funds-btn {
+            background: linear-gradient(135deg, #4fc3f7, #0d47a1);
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            padding: 14px 22px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 5px 15px rgba(79, 195, 247, 0.3);
+            white-space: nowrap;
+        }
+
+        .add-funds-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(79, 195, 247, 0.5);
+        }
+
+        /* ── Quick Actions ── */
+        .section-title {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .action-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            border-radius: 16px;
+            padding: 16px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            backdrop-filter: blur(10px);
+        }
+
+        .action-btn:hover {
+            background: rgba(79, 195, 247, 0.15);
+            border-color: #4fc3f7;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(79, 195, 247, 0.2);
+        }
+
+        .action-btn .icon {
+            font-size: 1.8rem;
+        }
+
+        .action-btn span {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.72rem;
+            text-align: center;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── TAP TO PAY button ── */
+        .tap-pay-wrapper {
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Ripple rings */
+        .ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid rgba(79, 195, 247, 0.4);
+            animation: ringPulse 2s infinite;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .ring:nth-child(1) { width: 120px; height: 120px; animation-delay: 0s; }
+        .ring:nth-child(2) { width: 160px; height: 160px; animation-delay: 0.4s; }
+        .ring:nth-child(3) { width: 200px; height: 200px; animation-delay: 0.8s; }
+
+        @keyframes ringPulse {
+            0%   { transform: translate(-50%, -50%) scale(0.8); opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0; }
+        }
+
+        .tap-btn {
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4fc3f7, #0d47a1);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 10px 40px rgba(79, 195, 247, 0.5);
+            transition: all 0.2s;
+            position: relative;
+            z-index: 2;
+        }
+
+        .tap-btn:hover {
+            transform: scale(1.08);
+            box-shadow: 0 15px 50px rgba(79, 195, 247, 0.7);
+        }
+
+        .tap-btn:active {
+            transform: scale(0.95);
+        }
+
+        .tap-btn .tap-icon { font-size: 2.5rem; }
+
+        .tap-btn .tap-label {
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        /* ── Transactions ── */
+        .transactions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tx-item {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .tx-item:hover {
+            background: rgba(79, 195, 247, 0.08);
+            border-color: rgba(79, 195, 247, 0.2);
+            transform: translateX(5px);
+        }
+
+        .tx-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .tx-icon.green  { background: rgba(76, 175, 80, 0.15); }
+        .tx-icon.red    { background: rgba(244, 67, 54, 0.15); }
+        .tx-icon.blue   { background: rgba(79, 195, 247, 0.15); }
+        .tx-icon.yellow { background: rgba(255, 193, 7, 0.15); }
+
+        .tx-info { flex: 1; }
+
+        .tx-info .tx-name {
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .tx-info .tx-date {
+            color: rgba(255,255,255,0.4);
+            font-size: 0.78rem;
+        }
+
+        .tx-amount {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .tx-amount.credit { color: #4caf50; }
+        .tx-amount.debit  { color: #f44336; }
+
+        /* ── Modal overlay ── */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.active { display: flex; }
+
+        .modal {
+            background: linear-gradient(180deg, #1e3a5f, #0f1e33);
+            border-radius: 30px 30px 0 0;
+            padding: 30px 25px 40px;
+            width: 100%;
+            max-width: 420px;
+            border: 1px solid rgba(79, 195, 247, 0.2);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to   { transform: translateY(0); }
+        }
+
+        .modal-handle {
+            width: 50px;
+            height: 5px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 3px;
+            margin: 0 auto 25px;
+        }
+
+        .modal h2 {
+            color: #fff;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        .modal p {
+            color: rgba(255,255,255,0.5);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        /* NFC animation in modal */
+        .nfc-anim {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            height: 120px;
+            margin-bottom: 25px;
+        }
+
+        .nfc-ring {
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid #4fc3f7;
+            animation: nfcRing 1.8s infinite;
+        }
+
+        .nfc-ring:nth-child(1) { width: 60px;  height: 60px;  animation-delay: 0s; }
+        .nfc-ring:nth-child(2) { width: 90px;  height: 90px;  animation-delay: 0.3s; }
+        .nfc-ring:nth-child(3) { width: 120px; height: 120px; animation-delay: 0.6s; }
+
+        @keyframes nfcRing {
+            0%   { transform: scale(0.8); opacity: 1; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+
+        .nfc-center {
+            font-size: 2.5rem;
+            z-index: 2;
+        }
+
+        /* Amount input */
+        .amount-input-wrap {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .amount-input-wrap .currency {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #4fc3f7;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .amount-input {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(79, 195, 247, 0.3);
+            border-radius: 14px;
+            padding: 18px 18px 18px 40px;
+            color: #fff;
+            font-size: 1.8rem;
+            font-weight: 700;
+            outline: none;
+            transition: border 0.2s;
+            text-align: center;
+        }
+
+        .amount-input:focus {
+            border-color: #4fc3f7;
+            box-shadow: 0 0 20px rgba(79, 195, 247, 0.2);
+        }
+
+        /* Quick amounts */
+        .quick-amounts {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .qa-btn {
+            background: rgba(79, 195, 247, 0.1);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            border-radius: 10px;
+            padding: 10px;
+            color: #4fc3f7;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .qa-btn:hover {
+            background: rgba(79, 195, 247, 0.25);
+            border-color: #4fc3f7;
+        }
+
+        /* Confirm pay btn */
+        .confirm-btn {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #4fc3f7, #0d47a1);
+            border: none;
+            border-radius: 16px;
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 800;
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: all 0.2s;
+            box-shadow: 0 8px 25px rgba(79, 195, 247, 0.4);
+        }
+
+        .confirm-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(79, 195, 247, 0.6);
+        }
+
+        .confirm-btn:active { transform: translateY(1px); }
+
+        /* ── Success screen ── */
+        .success-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 200;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .success-overlay.active { display: flex; }
+
+        .success-icon {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4caf50, #1b5e20);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            animation: successPop 0.5s ease;
+            box-shadow: 0 0 50px rgba(76, 175, 80, 0.5);
+        }
+
+        @keyframes successPop {
+            0%   { transform: scale(0); opacity: 0; }
+            70%  { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .success-title {
+            color: #fff;
+            font-size: 2rem;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .success-amount {
+            color: #4caf50;
+            font-size: 3rem;
+            font-weight: 800;
+        }
+
+        .success-sub {
+            color: rgba(255,255,255,0.5);
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .success-close {
+            margin-top: 20px;
+            padding: 15px 50px;
+            background: linear-gradient(135deg, #4fc3f7, #0d47a1);
+            border: none;
+            border-radius: 14px;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .success-close:hover { transform: translateY(-2px); }
+
+        /* ── Responsive ── */
+        @media (max-width: 400px) {
+            .quick-actions { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+            .action-btn    { padding: 12px 5px; }
+            .action-btn .icon { font-size: 1.5rem; }
+            .action-btn span  { font-size: 0.65rem; }
+            .card-number   { font-size: 1.1rem; letter-spacing: 4px; }
+            .balance-left .amount { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="bg-circles">
+    <div class="circle"></div>
+    <div class="circle"></div>
+    <div class="circle"></div>
+</div>
+
+<!-- ══════════════ APP ══════════════ -->
+<div class="app">
+
+    <!-- Header -->
+    <div class="header">
+        <h1>Tap<span>Pay</span></h1>
+        <div class="avatar">👤</div>
+    </div>
+
+    <!-- Card -->
+    <div class="card" onclick="openModal()">
+        <div class="card-circle"></div>
+        <div class="card-circle"></div>
+
+        <div class="card-top">
+            <div>
+                <div class="card-type">Tap & Go Wallet</div>
+            </div>
+            <div class="card-logo">💳</div>
+        </div>
+
+        <div class="card-number">•••• •••• •••• 4291</div>
+
+        <div class="card-bottom">
+            <div class="card-holder">
+                <label>CARD HOLDER</label>
+                <span>Alex Johnson</span>
+            </div>
+            <div class="card-expiry">
+                <label>EXPIRES</label>
+                <span>09/28</span>
+            </div>
+        </div>
+
+        <div class="nfc-icon">📶</div>
+    </div>
+
+    <!-- Balance -->
+    <div class="balance-box">
+        <div class="balance-left">
+            <label>AVAILABLE BALANCE</label>
+            <div class="amount"><span>$</span><span id="balanceAmt">2,450</span>.00</div>
+        </div>
+        <button class="add-funds-btn" onclick="addFunds()">+ Add Funds</button>
+    </div>
+
+    <!-- Quick Actions -->
+    <div>
+        <div class="section-title">Quick Actions</div>
+        <div class="quick-actions">
+            <div class="action-btn" onclick="openModal()">
+                <div class="icon">📲</div>
+                <span>Tap Pay</span>
+            </div>
+            <div class="action-btn" onclick="showInfo('Send Money')">
+                <div class="icon">💸</div>
+                <span>Send</span>
+            </div>
+            <div class="action-btn" onclick="showInfo('Receive Money')">
+                <div class="icon">📥</div>
+                <span>Receive</span>
+            </div>
+            <div class="action-btn" onclick="showInfo('Transaction History')">
+                <div class="icon">📊</div>
+                <span>History</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAP TO PAY -->
+    <div class="tap-pay-wrapper">
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <button class="tap-btn" onclick="openModal()">
+            <span class="tap-icon">📶</span>
+            <span class="tap-label">TAP TO PAY</span>
+        </button>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div>
+        <div class="section-title">Recent Transactions</div>
+        <div class="transactions">
+            <div class="tx-item">
+                <div class="tx-icon green">🛒</div>
+                <div class="tx-info">
+                    <div class="tx-name">Supermarket</div>
+                    <div class="tx-date">Today, 10:32 AM · Tap &amp; Go</div>
+                </div>
+                <div class="tx-amount debit">−$42.50</div>
+            </div>
+            <div class="tx-item">
+                <div class="tx-icon blue">☕</div>
+                <div class="tx-info">
+                    <div class="tx-name">Coffee Shop</div>
+                    <div class="tx-date">Today, 08:15 AM · Tap &amp; Go</div>
+                </div>
+                <div class="tx-amount debit">−$6.80</div>
+            </div>
+            <div class="tx-item">
+                <div class="tx-icon green">💰</div>
+                <div class="tx-info">
+                    <div class="tx-name">Salary Deposit</div>
+                    <div class="tx-date">Yesterday · Bank Transfer</div>
+                </div>
+                <div class="tx-amount credit">+$3,200.00</div>
+            </div>
+            <div class="tx-item">
+                <div class="tx-icon yellow">⛽</div>
+                <div class="tx-info">
+                    <div class="tx-name">Gas Station</div>
+                    <div class="tx-date">Yesterday · Tap &amp; Go</div>
+                </div>
+                <div class="tx-amount debit">−$85.00</div>
+            </div>
+            <div class="tx-item">
+                <div class="tx-icon red">🍕</div>
+                <div class="tx-info">
+                    <div class="tx-name">Restaurant</div>
+                    <div class="tx-date">2 days ago · Tap &amp; Go</div>
+                </div>
+                <div class="tx-amount debit">−$34.20</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ══════════════ TAP PAY MODAL ══════════════ -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+    <div class="modal">
+        <div class="modal-handle"></div>
+
+        <h2>💳 Tap & Go Payment</h2>
+        <p>Hold your device near the payment terminal</p>
+
+        <!-- NFC animation -->
+        <div class="nfc-anim">
+            <div class="nfc-ring"></div>
+            <div class="nfc-ring"></div>
+            <div class="nfc-ring"></div>
+            <div class="nfc-center">📶</div>
+        </div>
+
+        <!-- Amount input -->
+        <div class="amount-input-wrap">
+            <span class="currency">$</span>
+            <input
+                class="amount-input"
+                type="number"
+                id="payAmount"
+                placeholder="0.00"
+                min="0.01"
+                step="0.01"
+            />
+        </div>
+
+        <!-- Quick amounts -->
+        <div class="quick-amounts">
+            <button class="qa-btn" onclick="setAmount(10)">$10</button>
+            <button class="qa-btn" onclick="setAmount(20)">$20</button>
+            <button class="qa-btn" onclick="setAmount(50)">$50</button>
+            <button class="qa-btn" onclick="setAmount(100)">$100</button>
+        </div>
+
+        <button class="confirm-btn" onclick="confirmPayment()">
+            📲 CONFIRM PAYMENT
+        </button>
+    </div>
+</div>
+
+<!-- ══════════════ SUCCESS OVERLAY ══════════════ -->
+<div class="success-overlay" id="successOverlay">
+    <div class="success-icon">✅</div>
+    <div class="success-title">Payment Successful!</div>
+    <div class="success-amount" id="successAmt">$0.00</div>
+    <div class="success-sub">Your Tap & Go payment was processed.<br>Funds deducted from your wallet.</div>
+    <button class="success-close" onclick="closeSuccess()">DONE</button>
+</div>
+
+<script>
+    // ── State ────────────────────────────────────────────────
+    let balance = 2450.00;
+
+    // ── Helpers ──────────────────────────────────────────────
+    function formatMoney(n) {
+        return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function updateBalanceDisplay() {
+        // Split at decimal for display
+        const parts = balance.toFixed(2).split('.');
+        document.getElementById('balanceAmt').textContent = Number(parts[0]).toLocaleString();
+    }
+
+    // ── Modal ────────────────────────────────────────────────
+    function openModal() {
+        document.getElementById('modalOverlay').classList.add('active');
+        document.getElementById('payAmount').value = '';
+        document.getElementById('payAmount').focus();
+    }
+
+    function closeModal() {
+        document.getElementById('modalOverlay').classList.remove('active');
+    }
+
+    function closeModalOutside(e) {
+        if (e.target === document.getElementById('modalOverlay')) closeModal();
+    }
+
+    // ── Set quick amount ─────────────────────────────────────
+    function setAmount(val) {
+        document.getElementById('payAmount').value = val;
+    }
+
+    // ── Confirm payment ──────────────────────────────────────
+    function confirmPayment() {
+        const amt = parseFloat(document.getElementById('payAmount').value);
+
+        if (!amt || amt <= 0) {
+            alert('Please enter a valid amount.');
+            return;
+        }
+
+        if (amt > balance) {
+            alert('Insufficient balance!');
+            return;
+        }
+
+        // Deduct balance
+        balance -= amt;
+        updateBalanceDisplay();
+
+        // Add to transaction list
+        addTransaction('Tap & Go Payment', `Just now · Tap & Go`, amt, 'debit', '💳');
+
+        // Show success
+        closeModal();
+        document.getElementById('successAmt').textContent = `$${formatMoney(amt)}`;
+        document.getElementById('successOverlay').classList.add('active');
+    }
+
+    // ── Add a transaction row ────────────────────────────────
+    function addTransaction(name, date, amount, type, icon) {
+        const list = document.querySelector('.transactions');
+        const item = document.createElement('div');
+        item.className = 'tx-item';
+        item.style.borderColor = 'rgba(79,195,247,0.4)';
+        item.innerHTML = `
+            <div class="tx-icon blue">${icon}</div>
+            <div class="tx-info">
+                <div class="tx-name">${name}</div>
+                <div class="tx-date">${date}</div>
+            </div>
+            <div class="tx-amount ${type}">
+                ${type === 'debit' ? '−' : '+'}$${formatMoney(amount)}
+            </div>`;
+        list.prepend(item);
+    }
+
+    // ── Close success ────────────────────────────────────────
+    function closeSuccess() {
+        document.getElementById('successOverlay').classList.remove('active');
+    }
+
+    // ── Add Funds ────────────────────────────────────────────
+    function addFunds() {
+        const amt = parseFloat(prompt('Enter amount to add ($):'));
+        if (isNaN(amt) || amt <= 0) return;
+        balance += amt;
+        updateBalanceDisplay();
+        addTransaction('Funds Added', 'Just now · Bank Transfer', amt, 'credit', '💰');
+        alert(`✅ $${formatMoney(amt)} added to your wallet!`);
+    }
+
+    // ── Info placeholder ─────────────────────────────────────
+    function showInfo(feature) {
+        alert(`🚧 "${feature}" feature coming soon!`);
+    }
+
+    // ── Init ─────────────────────────────────────────────────
+    updateBalanceDisplay();
+</script>
+</body>
+</html>
