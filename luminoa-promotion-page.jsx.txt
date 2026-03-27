@@ -1,0 +1,483 @@
+import React, { useState, useEffect } from 'react';
+import { Play, Zap, Trophy, Users, Heart, Star, TrendingUp, Award, Flame, Clock, Gift, ArrowRight, Check, AlertCircle } from 'lucide-react';
+
+const LuminoaPromotionPage = () => {
+  const [timeLeft, setTimeLeft] = useState({ days: 7, hours: 14, minutes: 32, seconds: 18 });
+  const [hoveredFeature, setHoveredFeature] = useState(null);
+
+  // Countdown timer
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        let { days, hours, minutes, seconds } = prev;
+        seconds--;
+        if (seconds < 0) {
+          seconds = 59;
+          minutes--;
+          if (minutes < 0) {
+            minutes = 59;
+            hours--;
+            if (hours < 0) {
+              hours = 23;
+              days--;
+            }
+          }
+        }
+        return { days, hours, minutes, seconds };
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const features = [
+    {
+      icon: '⚡',
+      title: 'Lightning-Fast Gameplay',
+      description: 'Real-time multiplayer with zero lag. Compete against 50K+ players worldwide with instant match results.'
+    },
+    {
+      icon: '💰',
+      title: '$100K Weekly Prizes',
+      description: 'Win real money. Top 10 players earn weekly rewards. Tournaments with up to $25K prize pools.'
+    },
+    {
+      icon: '🎮',
+      title: '8+ Epic Games',
+      description: 'Action, strategy, puzzles, trivia - something for everyone. New games added monthly.'
+    },
+    {
+      icon: '🏆',
+      title: 'Real Leaderboards',
+      description: 'Climb the ranks. Global, seasonal, and weekly leaderboards. Become a legend.'
+    },
+    {
+      icon: '👥',
+      title: 'Vibrant Community',
+      description: 'Follow players, join teams, watch live streams. Build lasting connections with gamers.'
+    },
+    {
+      icon: '🌟',
+      title: 'Achievement System',
+      description: 'Unlock 50+ badges and achievements. Showcase your skills with exclusive cosmetics.'
+    },
+  ];
+
+  const promotions = [
+    {
+      title: '🎁 New Player Bonus',
+      description: '1000 FREE Points',
+      details: 'Just for signing up. Use them to enter tournaments today.',
+      color: 'from-cyan-500/20 to-blue-500/20',
+      border: 'border-cyan-500/50'
+    },
+    {
+      title: '⚡ Premium 50% OFF',
+      description: 'Limited Time Only',
+      details: 'First month just $14.99 (normally $29.99). Cancel anytime.',
+      color: 'from-gold/20 to-yellow-500/20',
+      border: 'border-gold/50'
+    },
+    {
+      title: '🎮 VIP Trial',
+      description: '7 Days FREE',
+      details: 'Experience VIP benefits: 3x lottery entries, exclusive tournaments.',
+      color: 'from-purple-500/20 to-pink-500/20',
+      border: 'border-purple-500/50'
+    },
+  ];
+
+  const testimonials = [
+    {
+      quote: 'I went from casual gamer to earning $3000 a month. LUMINOA changed my life!',
+      author: 'ProGamer_X',
+      role: 'Professional Player',
+      avatar: '⚡',
+      earned: '$3,000/mo'
+    },
+    {
+      quote: 'The community here is amazing. I made real friends and won my first tournament in 2 months.',
+      author: 'SkyWalker',
+      role: 'Casual Player',
+      avatar: '👨‍🚀',
+      earned: '$500 prize'
+    },
+    {
+      quote: 'Best competitive gaming platform I\'ve ever used. Fair matchmaking, real prizes, friendly people.',
+      author: 'NeonKing',
+      role: 'Top Ranked Player',
+      avatar: '👑',
+      earned: 'Tournament Champion'
+    },
+  ];
+
+  const rewards = [
+    { icon: '🥇', title: 'Weekly Rewards', description: 'Top 10 earn $100-1000' },
+    { icon: '🏆', title: 'Tournaments', description: 'Up to $25K per event' },
+    { icon: '📈', title: 'Seasonal Bonuses', description: 'Extra $10K pool per season' },
+    { icon: '🎁', title: 'Affiliate Program', description: 'Earn 20% lifetime commission' },
+  ];
+
+  const faqItems = [
+    {
+      q: 'Is LUMINOA free to play?',
+      a: 'Yes! Free players get access to 60% of games. Premium ($29.99/mo) unlocks everything plus 5x points on weekends.'
+    },
+    {
+      q: 'How do I earn money?',
+      a: 'Win matches to earn points → Redeem for real cash or tournament entry fees. Top 10 weekly players earn $100-1000.'
+    },
+    {
+      q: 'Is it really fair?',
+      a: 'Absolutely. We use skill-based matchmaking. You play people your level. No RNG, pure skill determines winners.'
+    },
+    {
+      q: 'Can I play on my phone?',
+      a: 'Yes! Web on mobile today. iOS & Android apps launching next month. Play anywhere, anytime.'
+    },
+    {
+      q: 'How do I withdraw my earnings?',
+      a: 'Minimum $10 cashout. PayPal, bank transfer, or crypto. Processed within 24 hours.'
+    },
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-black to-black text-white overflow-hidden font-sans">
+      {/* Animated background */}
+      <div className="fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-500/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-1/2 right-1/4 w-72 h-72 bg-gold/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
+      </div>
+
+      {/* FLASH BANNER */}
+      <div className="bg-gradient-to-r from-gold/30 to-red-500/30 border-b-2 border-gold/50 backdrop-blur">
+        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <Flame className="w-5 h-5 text-red-400 animate-bounce" />
+            <span className="font-bold">🎁 LIMITED TIME: 50% OFF Premium + 1000 Free Points!</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm font-bold">
+            <Clock className="w-4 h-4" />
+            {timeLeft.days}d {timeLeft.hours}h {timeLeft.minutes}m {timeLeft.seconds}s
+          </div>
+        </div>
+      </div>
+
+      {/* HERO SECTION */}
+      <section className="pt-20 pb-20 px-6">
+        <div className="max-w-7xl mx-auto text-center">
+          <div className="inline-block px-4 py-2 bg-cyan-500/10 border border-cyan-500/50 rounded-full mb-6">
+            <span className="text-cyan-300 text-sm font-semibold">🚀 Join 50,000+ Competitive Gamers</span>
+          </div>
+
+          <h1 className="text-6xl md:text-7xl font-black mb-6 leading-tight">
+            <span className="bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Play.
+            </span>
+            <br />
+            <span className="bg-gradient-to-r from-gold via-yellow-400 to-orange-400 bg-clip-text text-transparent">
+              Earn.
+            </span>
+            <br />
+            <span className="text-white">Dominate.</span>
+          </h1>
+
+          <p className="text-xl md:text-2xl text-gray-300 mb-4 max-w-3xl mx-auto leading-relaxed">
+            The #1 competitive gaming platform where skill meets real rewards. Win tournaments, climb leaderboards, and earn real money playing games you love.
+          </p>
+
+          <p className="text-lg text-gold font-bold mb-8">
+            💰 $100K+ prize pool • 🎮 8+ epic games • ⚡ 0-lag gameplay
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <button className="px-10 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-lg rounded-lg transition transform hover:scale-105 flex items-center justify-center gap-2">
+              <Play className="w-6 h-6" />
+              Play Free Now
+            </button>
+            <button className="px-10 py-4 border-2 border-cyan-500/50 hover:border-cyan-400 text-cyan-300 font-bold text-lg rounded-lg transition">
+              Watch 2-Min Demo
+            </button>
+          </div>
+
+          {/* Hero Stats */}
+          <div className="grid md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+            <div className="bg-indigo-900/30 border border-indigo-500/30 rounded-lg p-4">
+              <div className="text-3xl font-black text-cyan-400">50K+</div>
+              <div className="text-gray-400 text-sm">Active Players</div>
+            </div>
+            <div className="bg-indigo-900/30 border border-indigo-500/30 rounded-lg p-4">
+              <div className="text-3xl font-black text-gold">$100K</div>
+              <div className="text-gray-400 text-sm">Weekly Prizes</div>
+            </div>
+            <div className="bg-indigo-900/30 border border-indigo-500/30 rounded-lg p-4">
+              <div className="text-3xl font-black text-cyan-400">250+</div>
+              <div className="text-gray-400 text-sm">Games & Tournaments</div>
+            </div>
+            <div className="bg-indigo-900/30 border border-indigo-500/30 rounded-lg p-4">
+              <div className="text-3xl font-black text-gold">4.8★</div>
+              <div className="text-gray-400 text-sm">Player Rating</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* LIMITED TIME OFFERS */}
+      <section className="py-16 px-6 bg-black/50">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl font-black text-center mb-12">
+            🎁 Exclusive Launch Offers
+          </h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {promotions.map((promo, idx) => (
+              <div
+                key={idx}
+                className={`bg-gradient-to-br ${promo.color} border-2 ${promo.border} rounded-xl p-8 text-center transform hover:scale-105 transition`}
+              >
+                <h3 className="text-2xl font-black text-white mb-2">{promo.title}</h3>
+                <div className="text-3xl font-black text-gold mb-4">{promo.description}</div>
+                <p className="text-gray-300 mb-6">{promo.details}</p>
+                <button className="w-full py-3 bg-white/20 border border-white/50 text-white font-bold rounded-lg hover:bg-white/30 transition">
+                  Claim Now →
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* KEY FEATURES */}
+      <section className="py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-black text-center mb-4">
+            Why Choose <span className="text-cyan-400">LUMINOA</span>
+          </h2>
+          <p className="text-center text-gray-400 mb-16 max-w-2xl mx-auto">
+            We've built the ultimate gaming platform combining skill-based competition, real rewards, and an incredible community
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {features.map((feature, idx) => (
+              <div
+                key={idx}
+                onMouseEnter={() => setHoveredFeature(idx)}
+                onMouseLeave={() => setHoveredFeature(null)}
+                className={`bg-gradient-to-br from-indigo-900/40 to-purple-900/40 border border-cyan-500/20 rounded-xl p-8 transition transform ${
+                  hoveredFeature === idx ? 'border-cyan-400/50 from-indigo-900/60 to-purple-900/60 scale-105' : ''
+                }`}
+              >
+                <div className="text-5xl mb-4">{feature.icon}</div>
+                <h3 className="text-xl font-bold text-white mb-3">{feature.title}</h3>
+                <p className="text-gray-400">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* REWARDS & EARNINGS */}
+      <section className="py-20 px-6 bg-black/50">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-black text-center mb-12">
+            💰 How to <span className="text-gold">Earn Real Money</span>
+          </h2>
+
+          <div className="grid md:grid-cols-2 gap-8 mb-12">
+            <div>
+              <div className="text-5xl mb-4">🎯</div>
+              <h3 className="text-2xl font-bold text-white mb-4">Win Games, Earn Points</h3>
+              <p className="text-gray-400 mb-6">
+                Every win gives you points. Earn 10-100 points per game depending on difficulty. Cash out when you hit $10 minimum.
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
+                  <span className="text-gray-300">Easy withdrawal process</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
+                  <span className="text-gray-300">PayPal, bank transfer, crypto</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
+                  <span className="text-gray-300">24-hour processing</span>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div className="text-5xl mb-4">🏆</div>
+              <h3 className="text-2xl font-bold text-white mb-4">Join Tournaments, Win Big</h3>
+              <p className="text-gray-400 mb-6">
+                Enter tournaments and compete for real prize money. Weekly tournaments with $100-1000 payouts. Seasonal grand prizes up to $25K.
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
+                  <span className="text-gray-300">Skill-based matchmaking</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
+                  <span className="text-gray-300">Fair & transparent brackets</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Check className="w-5 h-5 text-green-400 flex-shrink-0" />
+                  <span className="text-gray-300">Instant prize payouts</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Reward Grid */}
+          <div className="grid md:grid-cols-4 gap-4">
+            {rewards.map((reward, idx) => (
+              <div key={idx} className="bg-indigo-900/30 border border-indigo-500/20 rounded-lg p-6 text-center hover:border-cyan-400/50 transition">
+                <div className="text-4xl mb-3">{reward.icon}</div>
+                <h4 className="font-bold text-white mb-1">{reward.title}</h4>
+                <p className="text-sm text-gray-400">{reward.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SOCIAL PROOF / TESTIMONIALS */}
+      <section className="py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-black text-center mb-4">
+            Loved by <span className="text-cyan-400">Competitive Gamers</span>
+          </h2>
+          <p className="text-center text-gray-400 mb-12 max-w-2xl mx-auto">
+            Join thousands of players earning real money and building lasting friendships
+          </p>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, idx) => (
+              <div key={idx} className="bg-gradient-to-br from-indigo-900/40 to-purple-900/40 border border-cyan-500/20 rounded-xl p-8 hover:border-cyan-400/50 transition">
+                <div className="flex items-center gap-3 mb-6">
+                  <span className="text-4xl">{testimonial.avatar}</span>
+                  <div>
+                    <h4 className="font-bold text-white">{testimonial.author}</h4>
+                    <p className="text-sm text-gray-400">{testimonial.role}</p>
+                  </div>
+                </div>
+
+                <p className="text-gray-300 mb-6 italic">"{testimonial.quote}"</p>
+
+                <div className="flex items-center gap-2 pt-6 border-t border-cyan-500/10">
+                  <Flame className="w-5 h-5 text-gold" />
+                  <span className="text-gold font-bold">{testimonial.earned}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* GAMES SHOWCASE */}
+      <section className="py-20 px-6 bg-black/50">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-black text-center mb-4">
+            8+ Epic <span className="text-cyan-400">Games</span> to Play
+          </h2>
+          <p className="text-center text-gray-400 mb-12 max-w-2xl mx-auto">
+            Something for everyone - action, strategy, puzzles, and more
+          </p>
+
+          <div className="grid md:grid-cols-4 gap-4">
+            {[
+              { emoji: '⚡', name: 'Neon Rush', type: 'Action' },
+              { emoji: '🎴', name: 'Card Masters', type: 'Strategy' },
+              { emoji: '⚔️', name: 'Battle Arena', type: 'Competitive' },
+              { emoji: '🧩', name: 'Puzzle Cosmic', type: 'Puzzle' },
+              { emoji: '🧠', name: 'Trivia League', type: 'Quiz' },
+              { emoji: '✈️', name: 'Sky Duel', type: 'Action' },
+              { emoji: '♟️', name: 'Chess Legends', type: 'Strategy' },
+              { emoji: '🎯', name: 'Block Blitz', type: 'Puzzle' },
+            ].map((game, idx) => (
+              <div key={idx} className="bg-indigo-900/30 border border-indigo-500/20 rounded-lg p-6 text-center hover:border-cyan-400/50 hover:bg-indigo-900/50 transition">
+                <div className="text-5xl mb-3">{game.emoji}</div>
+                <h4 className="font-bold text-white mb-1">{game.name}</h4>
+                <p className="text-xs text-gray-400">{game.type}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="py-20 px-6">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-4xl md:text-5xl font-black text-center mb-12">
+            Frequently Asked <span className="text-cyan-400">Questions</span>
+          </h2>
+
+          <div className="space-y-4">
+            {faqItems.map((item, idx) => (
+              <div key={idx} className="bg-indigo-900/30 border border-indigo-500/20 rounded-lg p-6 hover:border-cyan-400/50 transition">
+                <h3 className="text-lg font-bold text-white mb-3">{item.q}</h3>
+                <p className="text-gray-400">{item.a}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FINAL CTA */}
+      <section className="py-20 px-6 bg-gradient-to-r from-cyan-500/10 via-purple-500/10 to-gold/10 border-y border-cyan-500/10">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-5xl md:text-6xl font-black mb-6">
+            Ready to <span className="text-cyan-400">Dominate</span>?
+          </h2>
+          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+            Join 50,000+ competitive gamers. Play for free. Earn real money. Become a legend.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
+            <button className="px-12 py-5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-black text-xl rounded-lg transition transform hover:scale-105 flex items-center justify-center gap-2">
+              <Play className="w-7 h-7" />
+              Start Playing Free
+            </button>
+            <button className="px-12 py-5 border-2 border-gold/50 hover:border-gold text-gold font-black text-xl rounded-lg transition">
+              🎁 Claim $1000 Bonus
+            </button>
+          </div>
+
+          {/* Trust Badges */}
+          <div className="flex flex-wrap justify-center gap-6 pt-8 border-t border-cyan-500/10">
+            <div className="flex items-center gap-2">
+              <Check className="w-5 h-5 text-green-400" />
+              <span className="text-gray-300">Secure & Fair</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Check className="w-5 h-5 text-green-400" />
+              <span className="text-gray-300">Real Payouts</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Check className="w-5 h-5 text-green-400" />
+              <span className="text-gray-300">4.8★ Rated</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Check className="w-5 h-5 text-green-400" />
+              <span className="text-gray-300">Instant Payouts</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER CTA */}
+      <section className="py-16 px-6 border-t border-cyan-500/10">
+        <div className="max-w-7xl mx-auto text-center">
+          <p className="text-gray-400 mb-6">
+            No credit card required • Free to download • Play immediately
+          </p>
+          <p className="text-gray-500 text-sm">
+            © 2026 LUMINOA. All rights reserved. | <a href="#" className="text-cyan-400 hover:text-cyan-300">Terms</a> | <a href="#" className="text-cyan-400 hover:text-cyan-300">Privacy</a> | <a href="#" className="text-cyan-400 hover:text-cyan-300">Support</a>
+          </p>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default LuminoaPromotionPage;
