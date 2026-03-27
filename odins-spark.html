@@ -1,0 +1,921 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚔️ Odin's Spark Slot Machine ⚔️</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0c1445, #1a237e, #283593);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Odin-themed background elements */
+        .odin-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .rune {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0.3;
+            animation: float 15s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-20px) rotate(5deg); }
+            50% { transform: translateY(0) rotate(0deg); }
+            75% { transform: translateY(20px) rotate(-5deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+
+        .machine {
+            background: linear-gradient(145deg, #0d1b4a, #152166);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 0 50px rgba(100, 150, 255, 0.4),
+                        inset 0 0 20px rgba(0,0,0,0.7);
+            border: 2px solid #4fc3f7;
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Lightning effect */
+        .machine::before {
+            content: "";
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: linear-gradient(45deg, 
+                transparent, rgba(79, 195, 247, 0.2), transparent);
+            z-index: -1;
+            border-radius: 30px;
+            animation: lightning 3s infinite;
+            opacity: 0.5;
+        }
+
+        @keyframes lightning {
+            0% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+            100% { opacity: 0.3; }
+        }
+
+        /* Title */
+        .title {
+            text-align: center;
+            color: #4fc3f7;
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 0 0 15px rgba(79, 195, 247, 0.8);
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+            position: relative;
+        }
+
+        /* Info bar */
+        .info-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            gap: 10px;
+        }
+
+        .info-box {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #4fc3f7;
+            border-radius: 8px;
+            padding: 10px 15px;
+            text-align: center;
+            width: 48%;
+            box-shadow: 0 0 10px rgba(79, 195, 247, 0.3);
+        }
+
+        .info-box label {
+            color: #4fc3f7;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            display: block;
+            margin-bottom: 3px;
+        }
+
+        .info-box span {
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* Reels window */
+        .reels-window {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 12px;
+            border: 2px solid #4fc3f7;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Reel background */
+        .reels-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            position: relative;
+        }
+
+        .reel {
+            background: linear-gradient(145deg, #0d1b4a, #152166);
+            border-radius: 10px;
+            width: 100%;
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            border: 3px solid #2196f3;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.5);
+            min-height: 90px;
+            /* Add 3D depth */
+            transform-style: preserve-3d;
+            perspective: 1000px;
+            /* Sparkling effect */
+            background-image: 
+                radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 1px, transparent 2px),
+                radial-gradient(circle at 70% 70%, rgba(255,255,255,0.1) 1px, transparent 2px);
+        }
+
+        .reel:after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .reel.spinning {
+            animation: spinReel 0.05s infinite;
+            border-color: #4fc3f7;
+            box-shadow: 0 0 30px rgba(79, 195, 247, 0.8);
+            transform: rotateY(10deg) rotateX(5deg);
+        }
+
+        .reel.hold {
+            border-color: #ffeb3b;
+            box-shadow: 0 0 30px rgba(255, 235, 59, 0.8);
+            z-index: 10;
+        }
+
+        .reel.hold::after {
+            content: "HOLD";
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            background: rgba(255, 235, 59, 0.8);
+            color: #000;
+            font-size: 0.6rem;
+            padding: 1px 4px;
+            border-radius: 2px;
+            z-index: 10;
+        }
+
+        @keyframes spinReel {
+            0%   { transform: translateY(0) rotateY(0deg) rotateX(0deg); }
+            25%  { transform: translateY(-3px) rotateY(5deg) rotateX(5deg); }
+            50%  { transform: translateY(3px) rotateY(-5deg) rotateX(-5deg); }
+            75%  { transform: translateY(0) rotateY(0deg) rotateX(0deg); }
+            100% { transform: translateY(0) rotateY(0deg) rotateX(0deg); }
+        }
+
+        /* Win animation */
+        .reel.win {
+            animation: winPulse 0.5s infinite alternate;
+            z-index: 15;
+        }
+
+        @keyframes winPulse {
+            from { 
+                box-shadow: 0 0 20px rgba(79, 195, 247, 0.6); 
+                transform: scale(1);
+            }
+            to { 
+                box-shadow: 0 0 40px rgba(79, 195, 247, 1); 
+                transform: scale(1.05);
+            }
+        }
+
+        /* Win line */
+        .win-line {
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #4fc3f7, transparent);
+            margin: 10px 0;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: 2px;
+            box-shadow: 0 0 8px rgba(79, 195, 247, 0.7);
+        }
+
+        .win-line.active { opacity: 1; }
+
+        /* Coin drop effect */
+        .coin {
+            position: absolute;
+            font-size: 1.5rem;
+            z-index: 100;
+            animation: dropCoin 1.5s forwards;
+            pointer-events: none;
+        }
+
+        @keyframes dropCoin {
+            0% { 
+                transform: translateY(-50px) rotate(0deg); 
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(100px) rotate(360deg); 
+                opacity: 0;
+            }
+        }
+
+        /* Magic particles */
+        .magic-particle {
+            position: absolute;
+            background: radial-gradient(circle, #4fc3f7, #2196f3);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0.8;
+        }
+
+        /* Message */
+        .message {
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            min-height: 40px;
+            transition: all 0.3s;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .message.win {
+            color: #4fc3f7;
+            border: 2px solid #4fc3f7;
+            text-shadow: 0 0 12px rgba(79, 195, 247, 0.8);
+            animation: winFlash 0.5s infinite;
+        }
+
+        @keyframes winFlash {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; }
+            100% { opacity: 0.8; }
+        }
+
+        .message.lose {
+            color: #ff6b6b;
+            border: 2px solid #ff6b6b;
+            text-shadow: 0 0 8px rgba(255, 107, 107, 0.8);
+        }
+
+        .message.info {
+            color: #aaa;
+            border: 1px solid #444;
+        }
+
+        /* Bet controls */
+        .bet-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .bet-btn {
+            background: linear-gradient(145deg, #0d1b4a, #152166);
+            color: #4fc3f7;
+            border: 2px solid #4fc3f7;
+            border-radius: 6px;
+            padding: 8px 15px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            min-width: 40px;
+        }
+
+        .bet-btn:hover {
+            background: #4fc3f7;
+            color: #000;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(79, 195, 247, 0.4);
+        }
+
+        .bet-display {
+            background: rgba(0, 0, 0, 0.5);
+            color: #fff;
+            border: 2px solid #4fc3f7;
+            border-radius: 6px;
+            padding: 8px 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-width: 90px;
+            text-align: center;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        }
+
+        /* Spin button */
+        .spin-btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.6rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            background: linear-gradient(145deg, #4fc3f7, #0d47a1);
+            color: #000;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 6px 15px rgba(79, 195, 247, 0.4);
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .spin-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(79, 195, 247, 0.6);
+        }
+
+        .spin-btn:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+
+        .spin-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .spin-btn::after {
+            content: "SPIN";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .spin-btn:hover::after {
+            transform: translateX(100%);
+        }
+
+        /* Control panel */
+        .control-panel {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .control-btn {
+            background: linear-gradient(145deg, #0d1b4a, #152166);
+            color: #4fc3f7;
+            border: 2px solid #4fc3f7;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: bold;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        }
+
+        .control-btn:hover {
+            background: #4fc3f7;
+            color: #000;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(79, 195, 247, 0.4);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: #777;
+            margin-top: 15px;
+            font-size: 0.7rem;
+            padding: 8px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 500px) {
+            .machine {
+                padding: 15px 10px;
+            }
+            
+            .title {
+                font-size: 1.6rem;
+            }
+            
+            .info-bar {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .info-box {
+                width: 100%;
+            }
+            
+            .reels-container {
+                gap: 6px;
+            }
+            
+            .reel {
+                font-size: 2rem;
+                min-height: 70px;
+                border-width: 2px;
+            }
+            
+            .bet-controls {
+                flex-wrap: wrap;
+            }
+            
+            .bet-btn {
+                padding: 6px 10px;
+                font-size: 0.9rem;
+                min-width: 30px;
+            }
+            
+            .bet-display {
+                padding: 6px 12px;
+                font-size: 1rem;
+            }
+            
+            .spin-btn {
+                padding: 15px;
+                font-size: 1.4rem;
+            }
+            
+            .control-btn {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Odin-themed background elements -->
+    <div class="odin-bg" id="odinBg"></div>
+    
+    <div class="machine">
+        <div class="title">⚔️ ODIN'S SPARK ⚔️</div>
+
+        <!-- Balance & Win Info -->
+        <div class="info-bar">
+            <div class="info-box">
+                <label>BALANCE</label>
+                <span id="balance">$100</span>
+            </div>
+            <div class="info-box">
+                <label>LAST WIN</label>
+                <span id="lastWin">$0</span>
+            </div>
+        </div>
+
+        <!-- Reels -->
+        <div class="reels-window">
+            <div class="reels-container" id="reelsContainer">
+                <!-- Reels will be generated by JS -->
+            </div>
+            <div class="win-line" id="winLine"></div>
+        </div>
+
+        <!-- Message -->
+        <div class="message info" id="message">Place your bet and SPIN!</div>
+
+        <!-- Bet Controls -->
+        <div class="bet-controls">
+            <button class="bet-btn" onclick="changeBet(-5)">−5</button>
+            <button class="bet-btn" onclick="changeBet(-1)">−1</button>
+            <div class="bet-display">BET: $<span id="betAmount">10</span></div>
+            <button class="bet-btn" onclick="changeBet(1)">+1</button>
+            <button class="bet-btn" onclick="changeBet(5)">+5</button>
+        </div>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <button class="control-btn" onclick="holdReel(0)">Hold 1st</button>
+            <button class="control-btn" onclick="holdReel(1)">Hold 2nd</button>
+            <button class="control-btn" onclick="holdReel(2)">Hold 3rd</button>
+        </div>
+
+        <!-- Spin Button -->
+        <button class="spin-btn" id="spinBtn" onclick="spin()">SPIN</button>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>Odin's Spark - 3x3 Reels | Hold & Spin Feature | Ancient Symbols!</p>
+        </div>
+    </div>
+
+<script>
+    // ── Config ──────────────────────────────────────────────
+    const SYMBOLS_1ST = ['🔨', '⚔️', '🏹']; // Ancient hammer, warrior, bow and arrow
+    const WEIGHTS_1ST = [35, 30, 35]; // 1st reel weights
+    const SYMBOLS_2ND = ['⚔️', '⚔️', '⚔️', '⚔️', '⚔️', '⚔️', '⚔️', '⚔️', '⚔️', '⚔️']; // All warriors
+    const WEIGHTS_2ND = [100]; // All warriors
+    const SYMBOLS_3RD = ['🔨', '⚔️', '🏹']; // Ancient hammer, warrior, bow and arrow
+    const WEIGHTS_3RD = [35, 30, 35]; // 3rd reel weights
+    
+    // Special symbol - 666 pentagram
+    const SPECIAL_SYMBOL = '🔯';
+    
+    // Maximum hold count
+    const MAX_HOLD_COUNT = 3;
+    
+    // ── State ───────────────────────────────────────────────
+    let balance    = 100;
+    let bet        = 10;
+    let isSpinning = false;
+    let holds      = [false, false, false]; // Hold status for each reel
+    let holdCount  = 0;
+
+    // ── DOM refs ─────────────────────────────────────────────
+    const reelsContainer = document.getElementById('reelsContainer');
+    const balanceEl = document.getElementById('balance');
+    const lastWinEl = document.getElementById('lastWin');
+    const betEl     = document.getElementById('betAmount');
+    const msgEl     = document.getElementById('message');
+    const spinBtn   = document.getElementById('spinBtn');
+    const winLine   = document.getElementById('winLine');
+
+    // Create 3x3 reel grid
+    function initReels() {
+        reelsContainer.innerHTML = '';
+        for (let i = 0; i < 9; i++) {
+            const reel = document.createElement('div');
+            reel.className = 'reel';
+            reel.id = `reel${i}`;
+            reel.textContent = '⚔️';
+            reelsContainer.appendChild(reel);
+        }
+        
+        // Create background runes
+        createRunes();
+    }
+
+    // Create background runes
+    function createRunes() {
+        const odinBg = document.getElementById('odinBg');
+        for (let i = 0; i < 15; i++) {
+            const rune = document.createElement('div');
+            rune.className = 'rune';
+            rune.textContent = ['⚔️', '🏹', '🔨', '🔯', '🛡️', '🪙'][Math.floor(Math.random() * 6)];
+            rune.style.left = Math.random() * 100 + '%';
+            rune.style.top = Math.random() * 100 + '%';
+            rune.style.animationDuration = (10 + Math.random() * 20) + 's';
+            rune.style.fontSize = (1 + Math.random() * 1.5) + 'rem';
+            odinBg.appendChild(rune);
+        }
+    }
+
+    // ── Weighted Random Symbol ───────────────────────────────
+    function randomSymbol(symbols, weights) {
+        const total = weights.reduce((a, b) => a + b, 0);
+        let rand    = Math.random() * total;
+        for (let i = 0; i < symbols.length; i++) {
+            rand -= weights[i];
+            if (rand <= 0) return symbols[i];
+        }
+        return symbols[0];
+    }
+
+    // ── Calculate Payout ─────────────────────────────────────
+    function calcPayout(reels) {
+        const firstReel = reels[0];
+        const secondReel = reels[1];
+        const thirdReel = reels[2];
+        
+        // Check for winning combinations
+        let win = 0;
+        let winType = "none";
+        
+        // Check 1st and 3rd reel (same symbols)
+        if (firstReel === thirdReel && firstReel !== '⚔️') {
+            // 1st and 3rd match - check if 2nd is warrior
+            if (secondReel === '⚔️') {
+                win = bet * 10; // Warrior bonus
+                winType = "warrior_double";
+            } else {
+                win = bet * 3; // Regular match
+                winType = "double";
+            }
+        }
+        
+        // Check if any reel has the special pentagram symbol
+        if (firstReel === '🔯' || secondReel === '🔯' || thirdReel === '🔯') {
+            win = bet * 50; // Special symbol bonus
+            winType = "pentagram";
+        }
+        
+        // Check for 3 of a kind (except for warriors in 2nd position)
+        if (firstReel === secondReel && secondReel === thirdReel && firstReel !== '⚔️') {
+            win = bet * 15;
+            winType = "triple";
+        }
+        
+        // Check if 1st or 3rd reel is hammer with 2nd as warrior
+        if ((firstReel === '🔨' && secondReel === '⚔️') || 
+            (thirdReel === '🔨' && secondReel === '⚔️')) {
+            win = bet * 8;
+            winType = "hammer_warrior";
+        }
+        
+        // Check if 1st or 3rd reel is bow and arrow with 2nd as warrior
+        if ((firstReel === '🏹' && secondReel === '⚔️') || 
+            (thirdReel === '🏹' && secondReel === '⚔️')) {
+            win = bet * 8;
+            winType = "bow_warrior";
+        }
+        
+        // Check if 2nd reel is warrior (always pays)
+        if (secondReel === '⚔️') {
+            win = bet * 4;
+            winType = "warrior_second";
+        }
+        
+        // Check if 1st or 3rd reel is special symbol (pentagram)
+        if (firstReel === '🔯' || thirdReel === '🔯') {
+            win = bet * 25;
+            winType = "pentagram_special";
+        }
+        
+        return { 
+            win, 
+            winType,
+            reels 
+        };
+    }
+
+    // ── Spin ─────────────────────────────────────────────────
+    function spin() {
+        if (isSpinning) return;
+        if (balance < bet) {
+            setMessage('Not enough balance!', 'lose');
+            return;
+        }
+
+        isSpinning       = true;
+        balance         -= bet;
+        updateDisplay();
+        spinBtn.disabled = true;
+        winLine.classList.remove('active');
+        
+        // Clear previous win styles
+        document.querySelectorAll('.reel').forEach(r => {
+            r.classList.remove('win', 'hold');
+        });
+        
+        // Random results for all 9 reels
+        const results = [];
+        for (let i = 0; i < 9; i++) {
+            if (i === 1) {
+                // 2nd reel - all warriors
+                results[i] = '⚔️';
+            } else if (i % 3 === 0) {
+                // 1st reel (positions 0, 3, 6)
+                results[i] = randomSymbol(SYMBOLS_1ST, WEIGHTS_1ST);
+            } else {
+                // 3rd reel (positions 2, 5, 8)
+                results[i] = randomSymbol(SYMBOLS_3RD, WEIGHTS_3RD);
+            }
+        }
+
+        // Animate each reel with hold feature
+        const reelElements = document.querySelectorAll('.reel');
+        reelElements.forEach((reel, i) => {
+            reel.classList.add('spinning');
+            
+            // Show random symbols during spin if not held
+            let spinInterval;
+            if (i < 9 && !holds[i]) {
+                spinInterval = setInterval(() => {
+                    if (i === 1) {
+                        reel.textContent = '⚔️'; // Second reel is always warrior
+                    } else if (i % 3 === 0) {
+                        reel.textContent = randomSymbol(SYMBOLS_1ST, WEIGHTS_1ST);
+                    } else {
+                        reel.textContent = randomSymbol(SYMBOLS_3RD, WEIGHTS_3RD);
+                    }
+                }, 80);
+            }
+            
+            // Stop reel with stagger and handle holds
+            setTimeout(() => {
+                if (spinInterval) clearInterval(spinInterval);
+                if (holds[i] && i !== 1) {
+                    // Keep previous value for held reels (except 2nd which is always warrior)
+                    reel.classList.add('hold');
+                } else if (i === 1) {
+                    // 2nd reel is always warrior
+                    reel.textContent = '⚔️';
+                } else if (i % 3 === 0) {
+                    // 1st reel
+                    reel.textContent = results[i];
+                } else {
+                    // 3rd reel
+                    reel.textContent = results[i];
+                }
+                reel.classList.remove('spinning');
+                
+                // After all reels stop, evaluate
+                if (i === 8) {
+                    setTimeout(() => evaluateResult(results), 500);
+                }
+            }, 2500 + i * 250);
+        });
+    }
+
+    // ── Evaluate Result ──────────────────────────────────────
+    function evaluateResult(reels) {
+        const result = calcPayout(reels);
+        const winAmount = result.win;
+
+        // Handle wins
+        if (winAmount > 0) {
+            balance += winAmount;
+            lastWinEl.textContent = `$${winAmount}`;
+            
+            // Create coin drop effect
+            createCoinDrop(winAmount);
+            
+            // Highlight winning reels
+            for (let i = 0; i < 9; i++) {
+                if (i === 1 || reels[i] === '⚔️' || reels[i] === '🔯') { // 2nd reel or warriors/pentagram
+                    document.getElementById(`reel${i}`).classList.add('win');
+                }
+            }
+            
+            winLine.classList.add('active');
+            setMessage(`⚔️ ${winAmount > 0 ? `You win $${winAmount}!` : 'Ancient Victory!'}`, 'win');
+        } else {
+            lastWinEl.textContent = '$0';
+            setMessage('😢 No win — try again!', 'lose');
+        }
+
+        updateDisplay();
+        isSpinning       = false;
+        spinBtn.disabled = false;
+        
+        // Reset holds after spin
+        resetHolds();
+    }
+
+    // ── Create Coin Drop Effect ──────────────────────────────
+    function createCoinDrop(amount) {
+        const machine = document.querySelector('.machine');
+        const coinCount = Math.min(Math.floor(amount / 5), 10); // Max 10 coins
+        
+        for (let i = 0; i < coinCount; i++) {
+            const coin = document.createElement('div');
+            coin.className = 'coin';
+            coin.textContent = '🪙';
+            
+            // Position coin at random position in the machine
+            const machineRect = machine.getBoundingClientRect();
+            const x = Math.random() * (machineRect.width - 40) + machineRect.left;
+            const y = machineRect.top + 20;
+            
+            coin.style.left = x + 'px';
+            coin.style.top = y + 'px';
+            
+            document.body.appendChild(coin);
+            
+            // Remove coin after animation
+            setTimeout(() => {
+                coin.remove();
+            }, 1500);
+        }
+    }
+
+    // ── Hold Reel ────────────────────────────────────────────
+    function holdReel(reelIndex) {
+        if (isSpinning) return;
+        
+        if (holds[reelIndex]) {
+            // Release hold
+            holds[reelIndex] = false;
+            holdCount--;
+            document.getElementById(`reel${reelIndex}`).classList.remove('hold');
+            setMessage(`Released hold on reel ${reelIndex + 1}`, 'info');
+        } else {
+            // Check if we can hold
+            if (holdCount >= MAX_HOLD_COUNT) {
+                setMessage('Maximum holds reached!', 'lose');
+                return;
+            }
+            
+            holds[reelIndex] = true;
+            holdCount++;
+            document.getElementById(`reel${reelIndex}`).classList.add('hold');
+            setMessage(`Held reel ${reelIndex + 1}`, 'info');
+        }
+    }
+
+    // Reset holds
+    function resetHolds() {
+        holds = [false, false, false];
+        holdCount = 0;
+        document.querySelectorAll('.reel').forEach(reel => {
+            reel.classList.remove('hold');
+        });
+    }
+
+    // ── Helpers ──────────────────────────────────────────────
+    function changeBet(amount) {
+        if (isSpinning) return;
+        bet = Math.min(Math.max(1, bet + amount), balance);
+        betEl.textContent = bet;
+    }
+
+    function setMessage(text, type) {
+        msgEl.textContent  = text;
+        msgEl.className    = `message ${type}`;
+    }
+
+    function updateDisplay() {
+        balanceEl.textContent = `$${balance}`;
+        betEl.textContent     = bet;
+        // Clamp bet if balance drops below it
+        if (bet > balance) {
+            bet = Math.max(1, balance);
+            betEl.textContent = bet;
+        }
+    }
+
+    function restart() {
+        balance  = 100;
+        bet      = 10;
+        lastWinEl.textContent = '$0';
+        setMessage('Place your bet and SPIN!', 'info');
+        updateDisplay();
+        resetHolds();
+        initReels();
+        document.querySelectorAll('.reel').forEach(r => {
+            r.textContent = '⚔️';
+            r.classList.remove('win', 'hold');
+        });
+        winLine.classList.remove('active');
+    }
+
+    // Initialize on load
+    window.onload = function() {
+        initReels();
+        updateDisplay();
+    };
+</script>
+</body>
+</html>
+```
